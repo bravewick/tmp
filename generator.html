@@ -1,0 +1,146 @@
+<!doctype html>
+<html>
+    <head>
+        <meta charset="utf-8">
+        <meta name="description" content="">
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+        <title>Level Generator</title>
+        <link rel="stylesheet" href="css/style.css">
+        <link rel="author" href="humans.txt">
+        <script src="js/LevelGenerator.js"></script>
+        <script src="js/ObjectAnimation.js"></script>
+        <script src="js/Level.js"></script>
+        <script>
+
+            window.onload = function () {
+                var character = new ObjectAnimation('images/professor_walk.png', 576, 256, 64, 64);
+
+                var DEFAULT_SIZE = 50,
+                    LEVEL_WIDTH = DEFAULT_SIZE, LEVEL_HEIGHT = DEFAULT_SIZE,
+                    DEST_TILE_SIZE = 40,
+
+                    levelGenerator = new LevelGenerator(),
+                    canvas = document.getElementById('level'),
+                    ctx = canvas.getContext('2d'),
+                    _interval;
+
+                document.querySelector('#levelProperties').addEventListener('submit', function (e) {
+
+                    e.preventDefault();
+                    if (_interval) {
+//                        delete level;
+                        clearInterval(_interval);
+                    }
+                    console.log('hallo');
+                    LEVEL_WIDTH = document.getElementById('width').value || DEFAULT_SIZE;
+                    LEVEL_HEIGHT = document.getElementById('height').value || DEFAULT_SIZE;
+                    DEST_TILE_SIZE = document.querySelector('#tilesize').value || 40;
+                    canvas.width  = LEVEL_WIDTH * DEST_TILE_SIZE;
+                    canvas.height = LEVEL_HEIGHT * DEST_TILE_SIZE;
+                    var level = new Level('images/wall_sprites.png', 640, 40, 40, 40, LEVEL_WIDTH, null, DEST_TILE_SIZE);
+                    levelGenerator.generateRecursiveBacktracking(LEVEL_WIDTH, LEVEL_HEIGHT, function (data) {
+
+                        level.setGrid(data);
+                        _interval = setInterval(function () {
+//                            drawLevelUsingSpriteSheet(data, document.querySelector('#tilesize').value);
+                            level.draw(ctx);
+                            character.moveLeft(ctx);
+
+                        }, 100);
+                    });
+                });
+
+                // TILE MAPPING
+                // t01 = 1,    // 0001
+                // t02 = 8,    // 1000
+                // t03 = 4,    // 0100
+                // t04 = 2,    // 0010
+                // t11 = 9,    // 1001
+                // t12 = 12,   // 1100
+                // t13 = 6,    // 0110
+                // t14 = 3,    // 0011
+                // t21 = 11,   // 1011
+                // t22 = 13,   // 1101
+                // t23 = 14,   // 1110
+                // t24 = 7,    // 0111
+                // t31 = 5,    // 0101
+                // t32 = 10,   // 1010
+                // t33 = 15;   // 1111
+
+
+
+                function drawLevelUsingSpriteSheet(grid, tilesize) {
+                    var SPRITESHEET_TILE_SIZE = 40;
+                    var TILE_SIZE = tilesize || 40;
+                    console.log(SPRITESHEET_TILE_SIZE, TILE_SIZE);
+                    canvas.width  = LEVEL_WIDTH * TILE_SIZE;
+                    canvas.height = LEVEL_HEIGHT * TILE_SIZE;
+                    var imageElement = document.createElement('img');
+                    imageElement.src = './images/wall_sprites.png';
+                    imageElement.onload = function () {
+                        grid.forEach(function (tileData, i) {
+                            var x = i % LEVEL_WIDTH,
+                                y = Math.floor(i / LEVEL_WIDTH);
+                            ctx.drawImage(imageElement,tileData * SPRITESHEET_TILE_SIZE, 0 , SPRITESHEET_TILE_SIZE, SPRITESHEET_TILE_SIZE,
+                                          x * TILE_SIZE,
+                                          y * TILE_SIZE,
+                                          TILE_SIZE, TILE_SIZE);
+                        });
+                    }
+                }
+
+                // First Implementation of DRAW GRID
+                function drawLevel(grid) {
+                    var NORTH = 8, EAST = 4, SOUTH = 2, WEST = 1;
+
+                    function simpleDrawCell(ctx, x, y, properties) {
+                        var TILE_SIZE = 10;
+                        ctx.beginPath();
+
+                        if (properties & NORTH) {
+                            ctx.moveTo(x*TILE_SIZE, y*TILE_SIZE);
+                            ctx.lineTo(x*TILE_SIZE + TILE_SIZE, y*TILE_SIZE);
+                        }
+
+                        if (properties & EAST) {
+                            ctx.moveTo(x*TILE_SIZE + TILE_SIZE, y*TILE_SIZE);
+                            ctx.lineTo(x*TILE_SIZE + TILE_SIZE, y*TILE_SIZE + TILE_SIZE);
+                        }
+
+                        if (properties & SOUTH) {
+                            ctx.moveTo(x*TILE_SIZE, y*TILE_SIZE + TILE_SIZE);
+                            ctx.lineTo(x*TILE_SIZE + TILE_SIZE, y*TILE_SIZE + TILE_SIZE);
+                        }
+
+                        if (properties & WEST) {
+                            ctx.moveTo(x*TILE_SIZE, y*TILE_SIZE);
+                            ctx.lineTo(x*TILE_SIZE, y*TILE_SIZE + TILE_SIZE);
+                        }
+
+                        ctx.stroke();
+                    }
+
+                    for (var i = 0; i < SIZE * SIZE; i++){
+                        simpleDrawCell(ctx, i%SIZE, Math.floor(i/SIZE), grid[i]);
+                    }
+                }
+            }
+
+    	</script>
+    </head>
+    <body>
+        <form id="levelProperties" action="#" method="post">
+            <label>Width:</label>
+            <input id="width" type="number" name="width"/>
+            <label>Height:</label>
+            <input id="height" type="number" name="height"/>
+            <label>Tile Size:</label>
+            <input id="tilesize" type="number" name="tilesize"/>
+            <label>Seed:</label>
+            <input id="seed" type="text" name="seed" placeholder="not implemented yet"/>
+            <input id="gen" type="submit" value="Generate"/>
+            </br>
+        </form>
+        <canvas id="level" width="2000" height="2000"></canvas>
+    </body>
+</html>
