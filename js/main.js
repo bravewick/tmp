@@ -39,7 +39,9 @@ window.onload = function () {
       // Main Loop
       _interval = setInterval(function () {
         level.draw(ctx);
-        dude.moveLeft(ctx);
+        //dude.moveLeft(ctx);
+        //dude.moveRight(ctx);
+        dude.moveDown(ctx);
       }, 100);
     });
   });

@@ -14,17 +14,28 @@ export default class  Professor extends Sprite {
 
   moveLeft(ctx) {
     this.frame.y = 3;
-    ctx.drawImage(
-      this.sprites,
-      this.frame.x,
-      this.frame.y * this.spriteHeight,
-      this.spriteWidth,
-      this.spriteHeight,
-      this.position.x,
-      this.position.y,
-      this.spriteWidth,
-      this.spriteHeight
-    );
+    this._drawFrame(ctx);
+  }
+
+  moveRight(ctx) {
+    this.frame.y = 1;
+    this._drawFrame(ctx);
+  }
+
+  moveUp(ctx) {
+    this.frame.y = 0;
+    this._drawFrame(ctx);
+  }
+
+  moveDown(ctx) {
+    this.frame.y = 2;
+    this._drawFrame(ctx);
+  }
+
+  _drawFrame(ctx) {
+    ctx.drawImage(this.sprites, this.frame.x, this.frame.y * this.spriteHeight,
+      this.spriteWidth, this.spriteHeight, this.position.x,
+      this.position.y, this.spriteWidth, this.spriteHeight);
     this.frame.x = (this.frame.x + this.spriteWidth) % this.spriteFileWidth;
   }
 }
